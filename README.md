@@ -4,7 +4,7 @@ Provided here are csv files for data as well as scripts for processing and visua
 
 ## The folders in this top level directory are as follows:
 - ***QualitativeExamples***: Nifti files showing MRI scans, ground truth segmentations, and both public initial and final consensus model segmentation outputs in order to provide examples where there were small, medium, and large improvements of final consensus over public initial model segmentations
-- ***SourceData***: A folder containing a zipped archive of all data csvs providing source data that the scripts will use to create the plots and tables
+- ***SourceData***: A folder containing a subfolder of scripts to produce plots and tables, as well as a zipped archive of all data csvs providing source data that the scripts will use
 - ***fets_paper_figures***: Source code to create figures and manipulate pandas dataframes
 - ***output***: The default location for script png file output, an alternate location can be provided when running the scripts if desired
 
