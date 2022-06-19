@@ -121,7 +121,7 @@ def main(data_pardir, output_pardir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../data")
-    parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../output")
+    parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
+    parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../../output")
     args = parser.parse_args()
     main(**vars(args))
