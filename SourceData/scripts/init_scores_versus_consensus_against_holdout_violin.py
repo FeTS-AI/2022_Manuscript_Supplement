@@ -143,7 +143,7 @@ def main(data_pardir, output_pardir):
     cut = int(len(handles)/2)
     ax.legend(handles=handles[:cut] + cut*[None], labels=labels[:cut]+cut*[None], loc='lower left')
 
-    fpath = os.path.join(output_pardir, 'init_scores_versus_consensus_against_holdout_violin.png')
+    fpath = os.path.join(output_pardir, 'init_scores_versus_consensus_against_holdout_violin.pdf')
 
     print(f"\nThe p-values for each tumor region of the difference in the means between the public initial model and the final consensus are: {pvalues}\n\n")
     print("Saving output file at: ", fpath)

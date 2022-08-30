@@ -42,7 +42,7 @@ def main(data_pardir, output_pardir):
                                     xmin=0,
                                     ymin=0.6, 
                                     ymax=0.9, 
-                                    fpath=os.path.join(output_pardir, 'dice_better_on_larger_regions.png'), 
+                                    fpath=os.path.join(output_pardir, 'dice_better_on_larger_regions.pdf'), 
                                     custom_title='Mean Local Validation Across Sites', 
                                     metric_value_column_name='DSC', 
                                     metric_name_column_name='Region Of Interest')

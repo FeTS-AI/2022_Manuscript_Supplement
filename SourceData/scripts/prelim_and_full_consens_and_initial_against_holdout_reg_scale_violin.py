@@ -110,7 +110,7 @@ def main(data_pardir, output_pardir):
 
     ax.set_ylim(top=1.0, bottom=0)
 
-    fpath = os.path.join(output_pardir, 'prelim_and_full_consens_and_initial_against_holdout_reg_scale_violin.png')
+    fpath = os.path.join(output_pardir, 'prelim_and_full_consens_and_initial_against_holdout_reg_scale_violin.pdf')
 
     print(f"Saving output file at: {fpath}\n")
 

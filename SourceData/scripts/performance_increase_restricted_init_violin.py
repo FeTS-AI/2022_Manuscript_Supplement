@@ -173,7 +173,7 @@ def main(data_pardir, output_pardir):
 
     print(f"\n\nThe p-values for differences in mean validation over samples between the public initial and final consensus models are: {pvalues}\n\n")
 
-    fpath = os.path.join(output_pardir, 'performance_increase_restricted_init_violin.png')
+    fpath = os.path.join(output_pardir, 'performance_increase_restricted_init_violin.pdf')
 
     print("Saving output file at: ", fpath)
 

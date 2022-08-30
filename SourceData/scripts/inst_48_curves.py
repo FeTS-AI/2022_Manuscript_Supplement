@@ -35,7 +35,7 @@ def main(data_pardir, output_pardir):
     temp_df = temp_df.rename({"Binary DICE": "Tumor Sub-Compartment", 
                             "DICE": "DSC"}, axis=1)
 
-    fpath = os.path.join(output_pardir, 'inst_48_curves.png')
+    fpath = os.path.join(output_pardir, 'inst_48_curves.pdf')
 
     aggregated_fine_grained_binary_dice_over_rounds(df=temp_df, 
                                                     task='shared_model_validation', 

@@ -104,7 +104,7 @@ def main(data_pardir, output_pardir):
 
     show_values(ax, orient=orient, fontsize=12, shift_x_vals=-x_shift)
 
-    fpath = os.path.join(output_pardir, 'total_cases_plot_vert_python.png')
+    fpath = os.path.join(output_pardir, 'total_cases_plot_vert_python.pdf')
 
     print(f"Saving output file at: {fpath}\n")
 

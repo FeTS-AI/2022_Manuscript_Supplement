@@ -139,7 +139,7 @@ def main(data_pardir, output_pardir):
     ax.set_ylim(top=1.0, bottom=0.0)
     ax.set_title('Centralized Out-Of-Sample Data')
 
-    fpath = os.path.join(output_pardir, 'single_and_consensus_models_against_holdout_violin.png')
+    fpath = os.path.join(output_pardir, 'single_and_consensus_models_against_holdout_violin.pdf')
 
     print(f"Saving output file at: {fpath}")
 
