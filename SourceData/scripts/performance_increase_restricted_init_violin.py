@@ -20,29 +20,30 @@ import matplotlib.pyplot as plt
 import pandas as pd   
 
 from fets_paper_figures import prep_plots, get_comparison_df_detailed, my_violin_plot, interp_MBD_best_round, save_at_dpi
-from fets_paper_figures import other_font_size, compute_increases
+from fets_paper_figures import other_font_size, compute_increases, dice_or_jaccard
 
-def main(data_pardir, output_pardir):    
+def main(data_pardir, output_pardir, jaccard):    
     
     prep_plots()
 
-    df = pd.read_csv(os.path.join(data_pardir, 'val_df_final__.csv'))
+    new_metric_names, metrics, region_label_dict, IN_DF_DICE_OR_JACCARD, DICE_OR_JACCARD = dice_or_jaccard(jaccard)
 
-    vmodel_score, init_score, restricted_init_score, percent_increase_restricted = compute_increases(model_round=interp_MBD_best_round, df=df)
+    df = pd.read_csv(os.path.join(data_pardir, 'val_df_final.csv'))
 
-    spread_version_df, spread_init_df = get_comparison_df_detailed(model_round=interp_MBD_best_round, df=df)
+    vmodel_score, init_score, restricted_init_score, percent_increase_restricted = compute_increases(model_round=interp_MBD_best_round, 
+                                                                                                     df=df, 
+                                                                                                     jaccard=jaccard)
+
+    spread_version_df, spread_init_df = get_comparison_df_detailed(model_round=interp_MBD_best_round, 
+                                                                   df=df, 
+                                                                   jaccard=jaccard)
 
     spread_version_df['Model'] = 'Full Federation Consensus'
     spread_init_df['Model'] = 'Public Initial Model'
 
-    print(spread_version_df)
-    print(f"length of spread init df is: {len(spread_init_df)}")
-    print(spread_init_df)
-
     compare_with_restriced_inits_df_details = spread_init_df.append(spread_version_df)
 
-    compare_with_restriced_inits_df_details = compare_with_restriced_inits_df_details.rename({"Binary DICE": "Region Of Interest", 
-                                                                                            "DICE": "DSC"}, axis=1)
+    compare_with_restriced_inits_df_details = compare_with_restriced_inits_df_details.rename({IN_DF_DICE_OR_JACCARD: DICE_OR_JACCARD}, axis=1)
 
 
     my_pal = [(0.00392156862745098, 0.45098039215686275, 0.6980392156862745), 
@@ -50,9 +51,9 @@ def main(data_pardir, output_pardir):
 
     # getting p values for comparisons
     pvalues = {}
-    for metric in compare_with_restriced_inits_df_details["Region Of Interest"].unique():
-        samples_1 = compare_with_restriced_inits_df_details[(compare_with_restriced_inits_df_details["Model"] == "Public Initial Model") & (compare_with_restriced_inits_df_details["Region Of Interest"] == metric)]["DSC"].values
-        samples_2 = compare_with_restriced_inits_df_details[(compare_with_restriced_inits_df_details["Model"] == 'Full Federation Consensus') & (compare_with_restriced_inits_df_details["Region Of Interest"] == metric)]["DSC"].values
+    for metric in compare_with_restriced_inits_df_details["Tumor Sub-Compartment"].unique():
+        samples_1 = compare_with_restriced_inits_df_details[(compare_with_restriced_inits_df_details["Model"] == "Public Initial Model") & (compare_with_restriced_inits_df_details["Tumor Sub-Compartment"] == metric)][DICE_OR_JACCARD].values
+        samples_2 = compare_with_restriced_inits_df_details[(compare_with_restriced_inits_df_details["Model"] == 'Full Federation Consensus') & (compare_with_restriced_inits_df_details["Tumor Sub-Compartment"] == metric)][DICE_OR_JACCARD].values
         min_length = min(len(samples_1), len(samples_2))
         samples_1 = samples_1[:min_length]
         samples_2 = samples_2[:min_length]
@@ -63,14 +64,13 @@ def main(data_pardir, output_pardir):
         
     # get the PIM to appear first
     sorting_key = lambda x: x.apply(lambda x: {'Full Federation Consensus': 1,
-                                            'Public Initial Model': 0}[x]
-                                )
-    compare_with_restriced_inits_df_details = compare_with_restriced_inits_df_details.rename({'Region Of Interest': 'Tumor Sub-Compartment'}, axis=1)                   
+                                            'Public Initial Model': 0}[x])
+                                          
 
 
 
     ax = my_violin_plot(x_column='Tumor Sub-Compartment', 
-                    y_column='DSC', 
+                    y_column=DICE_OR_JACCARD, 
                     hue='Model', 
                     data=compare_with_restriced_inits_df_details, 
                     mean_marker_size=20,
@@ -102,8 +102,8 @@ def main(data_pardir, output_pardir):
 
 
     # place text boxes
-    text_insert = f'{percent_increase_restricted["MeanBinaryDICE"]:.0f}%\nGain'
-    print("\nThe percent increase of " + text_insert + " should go with MBD")
+    text_insert = f'{percent_increase_restricted["MeanBinary" + IN_DF_DICE_OR_JACCARD]:.0f}%\nGain'
+    print("\nThe percent increase of " + text_insert + " should go with MB")
     ax.text(hor_text_loc['Average'], vert_text_loc['Average'], text_insert, transform=ax.transAxes, 
             fontsize=other_font_size, 
             color='red',
@@ -117,7 +117,7 @@ def main(data_pardir, output_pardir):
                 head_length=0.03,
                 color='red')
 
-    text_insert = f'{percent_increase_restricted["binary_DICE_ET"]:.0f}%\nGain'
+    text_insert = f'{percent_increase_restricted["binary_" + IN_DF_DICE_OR_JACCARD + "_ET"]:.0f}%\nGain'
     ax.text(hor_text_loc['ET'], vert_text_loc['ET'], text_insert, transform=ax.transAxes, fontsize=other_font_size, color='red',
             verticalalignment='top')
     print("\nThe percent increase of " + text_insert + " should go with ET")
@@ -131,7 +131,7 @@ def main(data_pardir, output_pardir):
                 color='red')
 
 
-    text_insert = f'{percent_increase_restricted["binary_DICE_TC"]:.0f}%\nGain'
+    text_insert = f'{percent_increase_restricted["binary_" + IN_DF_DICE_OR_JACCARD + "_TC"]:.0f}%\nGain'
     print("\nThe percent increase of " + text_insert + " should go with TC")
     ax.text(hor_text_loc['TC'], vert_text_loc['TC'], text_insert, transform=ax.transAxes, fontsize=other_font_size, color='red',
             verticalalignment='top')
@@ -145,7 +145,7 @@ def main(data_pardir, output_pardir):
                 color='red')
 
 
-    text_insert = f'{percent_increase_restricted["binary_DICE_WT"]:.0f}%\nGain'
+    text_insert = f'{percent_increase_restricted["binary_" + IN_DF_DICE_OR_JACCARD + "_WT"]:.0f}%\nGain'
     print("\nThe percent increase of " + text_insert + " should go with WT")
     ax.text(hor_text_loc['WT'], vert_text_loc['WT'], text_insert, transform=ax.transAxes, fontsize=other_font_size, color='red',
             verticalalignment='top')
@@ -173,7 +173,7 @@ def main(data_pardir, output_pardir):
 
     print(f"\n\nThe p-values for differences in mean validation over samples between the public initial and final consensus models are: {pvalues}\n\n")
 
-    fpath = os.path.join(output_pardir, 'performance_increase_restricted_init_violin.pdf')
+    fpath = os.path.join(output_pardir, 'performance_increase_restricted_init_violin_' + DICE_OR_JACCARD + '.pdf')
 
     print("Saving output file at: ", fpath)
 
@@ -184,5 +184,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
     parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../../output")
+    parser.add_argument('--jaccard', '-j', action='store_true', help='Whether or not to convert DICE scores to Jaccard index.')
     args = parser.parse_args()
     main(**vars(args))

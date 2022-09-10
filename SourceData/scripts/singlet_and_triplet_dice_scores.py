@@ -14,13 +14,21 @@
 import argparse, os
 import pandas as pd
 
+from fets_paper_figures import dice_to_jaccard, JACCARD, DICE
 
-def main(data_pardir):
+
+def main(data_pardir, jaccard):
     sing_trip_results = pd.read_csv(os.path.join(data_pardir, 'singlet_and_triplet_dice_scores.csv'))
-    print(sing_trip_results.to_latex())
+    if jaccard:
+           sing_trip_results = dice_to_jaccard(df=sing_trip_results, 
+                                               dice_colnames=[DICE], 
+                                               jaccard_colnames=[JACCARD])
+    print(sing_trip_results.style.to_latex())
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
+    parser.add_argument('--jaccard', '-j', action='store_true', help='Whether or not to convert DICE scores to Jaccard index.')
+    
     args = parser.parse_args()
     main(**vars(args))

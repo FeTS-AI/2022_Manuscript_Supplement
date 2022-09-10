@@ -14,20 +14,38 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from .plotting import save_at_dpi
+from .plotting import save_at_dpi, DICE, IN_DF_DICE, IN_DF_JACCARD, JACCARD
 import seaborn as sns
 
-metrics = ['MeanBinaryDICE', 'binary_DICE_WT', 'binary_DICE_TC', 'binary_DICE_ET'] 
 
-region_label_dict = {'MeanBinaryDICE': "Average",
-                     'binary_DICE_WT': "WT",
-                     'binary_DICE_TC': "TC", 
-                     'binary_DICE_ET': "ET"}
+def dice_or_jaccard(jaccard):
 
-new_metric_names = [region_label_dict[metric] for metric in metrics]
-    
+    if jaccard:
+        IN_DF_DICE_OR_JACCARD = IN_DF_JACCARD
+        DICE_OR_JACCARD = JACCARD
+    else:
+        IN_DF_DICE_OR_JACCARD = IN_DF_DICE
+        DICE_OR_JACCARD = DICE
 
-def spread_metrics_across_rows(df, metrics=metrics, new_metric_names=new_metric_names, region_label_dict=region_label_dict):
+    metrics = ['MeanBinary' + IN_DF_DICE_OR_JACCARD, 
+               'binary_' + IN_DF_DICE_OR_JACCARD + '_WT', 
+               'binary_' + IN_DF_DICE_OR_JACCARD + '_TC', 
+               'binary_' + IN_DF_DICE_OR_JACCARD + '_ET'] 
+
+
+    region_label_dict = {metrics[0]: "Average",
+                        metrics[1]: "WT",
+                        metrics[2]: "TC", 
+                        metrics[3]: "ET"}
+
+    new_metric_names = [region_label_dict[metric] for metric in metrics]
+
+    return new_metric_names, metrics, region_label_dict, IN_DF_DICE_OR_JACCARD, DICE_OR_JACCARD
+
+
+def spread_metrics_across_rows(df, jaccard):
+
+    new_metric_names, _, region_label_dict, IN_DF_DICE_OR_JACCARD, _ = dice_or_jaccard(jaccard)
     
     temp_df = df.copy()
     
@@ -38,7 +56,7 @@ def spread_metrics_across_rows(df, metrics=metrics, new_metric_names=new_metric_
     temp_df = temp_df[['ModelVersion'] + new_metric_names].set_index(['ModelVersion'])
 
     # create two level of columns to put all columns (metrics) under a top level : 'DICE'
-    temp_df.columns = pd.MultiIndex.from_tuples([('DICE', metric) for metric in new_metric_names])
+    temp_df.columns = pd.MultiIndex.from_tuples([(IN_DF_DICE_OR_JACCARD, metric) for metric in new_metric_names])
 
     # now stack the dataframe
     final_df = temp_df.stack()
@@ -49,12 +67,13 @@ def spread_metrics_across_rows(df, metrics=metrics, new_metric_names=new_metric_
     # The level_1 column will contain the string of which metric applies, and the DICE holds the value.
 
     # renaming the level_1 column
-    final_df = final_df.rename(mapper={'level_1': 'Binary DICE'}, axis=1)
+    final_df = final_df.rename(mapper={'level_1': 'Tumor Sub-Compartment'}, axis=1)
     
     return final_df
 
 
-def get_comparison_df_detailed (model_round, df, new_metric_names=new_metric_names):
+def get_comparison_df_detailed (model_round, df, jaccard):
+
     temp_df = df[df['TaskName']=='shared_model_validation']
 
     version_df = temp_df[temp_df['ModelVersion']==model_round]
@@ -62,10 +81,10 @@ def get_comparison_df_detailed (model_round, df, new_metric_names=new_metric_nam
     
     print(f"length of init df is {len(init_df)}")
     
-    return spread_metrics_across_rows(version_df), spread_metrics_across_rows(init_df)
+    return spread_metrics_across_rows(version_df, jaccard=jaccard), spread_metrics_across_rows(init_df, jaccard=jaccard)
 
 
-def compute_increases(model_round, df):
+def compute_increases(model_round, df, jaccard):
     
     temp_df = df[df['TaskName']=='shared_model_validation']
 
@@ -77,6 +96,8 @@ def compute_increases(model_round, df):
     init_score = {}
     restricted_init_score = {}
     percent_increase_restricted = {}
+
+    _, metrics, _, _, _ = dice_or_jaccard(jaccard)
     
     for metric in metrics:
         vmodel_score[metric] = v_df[metric].mean()

@@ -11,7 +11,8 @@
 # limitations under the License.
 
 
-from .plotting import BINARY_DICE, DICE, my_violin_plot, prep_plots, other_font_size, interp_MBD_best_round
+from .plotting import BINARY_DICE, DICE, IN_DF_DICE, JACCARD, IN_DF_JACCARD, my_violin_plot, prep_plots, other_font_size, interp_MBD_best_round
 from .plotting import curvepermetric_value_over_rounds, save_at_dpi, font_scale, value_label
 
-from .data_parsing_and_plotting import metrics, compute_increases, get_comparison_df_detailed, aggregated_fine_grained_binary_dice_over_rounds
+from .data_parsing_and_plotting import compute_increases, get_comparison_df_detailed
+from .data_parsing_and_plotting import aggregated_fine_grained_binary_dice_over_rounds, dice_or_jaccard

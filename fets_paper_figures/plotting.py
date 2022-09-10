@@ -38,6 +38,9 @@ other_font_size = 28
 # Naming
 BINARY_DICE = 'Tumor Sub-Compartment'
 DICE = 'DSC'
+IN_DF_DICE = 'DICE'
+IN_DF_JACCARD = 'JACCARD'
+JACCARD = 'JSC'
 
 value_label = 'Total Cases(train and val)'
 
@@ -212,7 +215,7 @@ def curvepermetric_value_over_rounds(df,
 
     # sanity check assumptions listed above
     if not set(metric_names).issubset(set(list(temp_df.columns))):
-        raise ValueError('Some of the provided metric names are not columns of the provided dataferame.')
+        raise ValueError(f'Some of the provided metric names {metric_names} are not in the provided dataferame columns {temp_df.columns}.')
     
     # restrict to only metric names columns, with model version as the index
     temp_df = temp_df[['ModelVersion'] + metric_names].set_index(['ModelVersion'])

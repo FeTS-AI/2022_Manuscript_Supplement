@@ -16,5 +16,5 @@ setup(name='fets_paper_figures',
       version='0.0.1',
       packages=['fets_paper_figures'],
       exclude =[],
-      install_requires=['matplotlib', 'pandas', 'seaborn', 'numpy', 'scipy']
+      install_requires=['matplotlib', 'pandas', 'seaborn', 'numpy', 'scipy', 'Jinja2']
 )
