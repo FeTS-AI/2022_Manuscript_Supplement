@@ -18,10 +18,11 @@ import numpy as np
 import pandas as pd
 import scipy
 
-from fets_paper_figures import prep_plots, save_at_dpi, my_violin_plot, BINARY_DICE, DICE
+from fets_paper_figures import prep_plots, save_at_dpi, my_violin_plot, dice_or_jaccard
 
+BINARY_DICE = 'Tumor Sub-Compartment'
 
-def main(data_pardir, output_pardir):
+def main(data_pardir, output_pardir, jaccard):
 
     # Now combine the initial model with the prelim fed consensus model with the main fed consensus (singlet_0) both restricted to inhouse cases
     # prelim consensus were already only evaluated against the inhouse heldout data
@@ -29,10 +30,17 @@ def main(data_pardir, output_pardir):
 
     # Since this is tested against a subset of the hold-out data, we use hatch='x'
 
+    new_metric_names, metrics, region_label_dict, IN_DF_DICE_OR_JACCARD, DICE_OR_JACCARD = dice_or_jaccard(jaccard)
+
     prelim_consensus_df = pd.read_csv(os.path.join(data_pardir, 'prelim_consensus_df.csv'))
     init_val_inhouse_only_df = pd.read_csv(os.path.join(data_pardir, 'init_val_inhouse_only_df.csv'))
     single_models_val_df = pd.read_csv(os.path.join(data_pardir, 'single_models_val_df.csv'))
     consensus_model_results_inhouse_only_df = pd.read_csv(os.path.join(data_pardir, 'consensus_model_results_inhouse_only_df.csv'))
+
+    # TODO: remove debug DEBUG below
+    print(prelim_consensus_df.columns)
+    print(single_models_val_df.columns)
+    print(consensus_model_results_inhouse_only_df.columns)
 
     prep_plots()
 
@@ -60,8 +68,8 @@ def main(data_pardir, output_pardir):
     for model_type in [("Preliminary Federation Consensus", "init vs Preliminary federation consensus"), 
                     ("Full Federation Consensus", "init vs Full federation consensus")]:
         for metric in init_val_inhouse_only_df[BINARY_DICE].unique():
-            samples_1 = temp_df[(temp_df["Model Type"] == "Public Initial Model") & (temp_df[BINARY_DICE] == metric)][DICE].values
-            samples_2 = temp_df[(temp_df["Model Type"] == model_type[0]) & (temp_df[BINARY_DICE] == metric)][DICE].values
+            samples_1 = temp_df[(temp_df["Model Type"] == "Public Initial Model") & (temp_df[BINARY_DICE] == metric)][DICE_OR_JACCARD].values
+            samples_2 = temp_df[(temp_df["Model Type"] == model_type[0]) & (temp_df[BINARY_DICE] == metric)][DICE_OR_JACCARD].values
             stat, pvalue = scipy.stats.wilcoxon(samples_1, samples_2)
             m1, m2 = np.mean(samples_1), np.mean(samples_2)
             sd1, sd2 = np.std(samples_1), np.std(samples_2)
@@ -84,7 +92,7 @@ def main(data_pardir, output_pardir):
 
 
     ax = my_violin_plot(x_column=BINARY_DICE, 
-                    y_column=DICE, 
+                    y_column=DICE_OR_JACCARD, 
                     data=temp_df, 
                     hue='Model Type', 
                     order=['Average', 'ET', 'TC', 'WT'], 
@@ -110,7 +118,7 @@ def main(data_pardir, output_pardir):
 
     ax.set_ylim(top=1.0, bottom=0)
 
-    fpath = os.path.join(output_pardir, 'prelim_and_full_consens_and_initial_against_holdout_reg_scale_violin.pdf')
+    fpath = os.path.join(output_pardir, 'prelim_and_full_consens_and_initial_against_holdout_reg_scale_violin_' + DICE_OR_JACCARD + '.pdf')
 
     print(f"Saving output file at: {fpath}\n")
 
@@ -123,5 +131,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
     parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../../output")
+    parser.add_argument('--jaccard', '-j', action='store_true', help='Whether or not to convert DICE scores to Jaccard index.')  
     args = parser.parse_args()
     main(**vars(args))
