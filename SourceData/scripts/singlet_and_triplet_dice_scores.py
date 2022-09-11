@@ -14,15 +14,15 @@
 import argparse, os
 import pandas as pd
 
-from fets_paper_figures import dice_to_jaccard, JACCARD, DICE
+from fets_paper_figures import JACCARD, IN_DF_JACCARD, DICE, IN_DF_DICE
 
 
 def main(data_pardir, jaccard):
-    sing_trip_results = pd.read_csv(os.path.join(data_pardir, 'singlet_and_triplet_dice_scores.csv'))
     if jaccard:
-           sing_trip_results = dice_to_jaccard(df=sing_trip_results, 
-                                               dice_colnames=[DICE], 
-                                               jaccard_colnames=[JACCARD])
+        sing_trip_results = pd.read_csv(os.path.join(data_pardir, 'singlet_and_triplet_jaccard_scores.csv'))
+    else:   
+        sing_trip_results = pd.read_csv(os.path.join(data_pardir, 'singlet_and_triplet_dice_scores.csv'))
+        
     print(sing_trip_results.style.to_latex())
 
 if __name__ == '__main__':
