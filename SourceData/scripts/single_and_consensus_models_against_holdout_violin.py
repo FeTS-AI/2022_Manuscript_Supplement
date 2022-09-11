@@ -18,17 +18,18 @@ import scipy
 import numpy as np
 import pandas as pd
 
-from fets_paper_figures import prep_plots, my_violin_plot, save_at_dpi, BINARY_DICE, DICE
+from fets_paper_figures import prep_plots, my_violin_plot, save_at_dpi, BINARY_DICE, DICE, JACCARD, dice_or_jaccard
 
 
-def main(data_pardir, output_pardir):
+def main(data_pardir, output_pardir, jaccard):
 
 
 
     single_models_val_df = pd.read_csv(os.path.join(data_pardir, 'single_models_val_df.csv'))
     consensus_model_results_inhouse_only_df = pd.read_csv(os.path.join(data_pardir, 'consensus_model_results_inhouse_only_df.csv'))
 
-
+    new_metric_names, metrics, region_label_dict, IN_DF_DICE_OR_JACCARD, DICE_OR_JACCARD = dice_or_jaccard(jaccard)
+    
 
     # Now one that brings in the consensus models (but only tested against inhouse data as that is what was
     # used for the single model scoring)
@@ -61,8 +62,8 @@ def main(data_pardir, output_pardir):
 
     # some stdout for the paper
     for metric in ['Average', 'ET', 'TC', 'WT']:
-        consens_result = temp_df[(temp_df['Model Name']=='Full Federation Consensus') & (temp_df[BINARY_DICE]==metric)][DICE].mean()
-        ensemble_result = temp_df[(temp_df['Model Name']=='G ensemble') & (temp_df[BINARY_DICE]==metric)][DICE].mean()
+        consens_result = temp_df[(temp_df['Model Name']=='Full Federation Consensus') & (temp_df[BINARY_DICE]==metric)][DICE_OR_JACCARD].mean()
+        ensemble_result = temp_df[(temp_df['Model Name']=='G ensemble') & (temp_df[BINARY_DICE]==metric)][DICE_OR_JACCARD].mean()
         print(f"For metric {metric}, the consensus scored {consens_result}, the ensemble scored {ensemble_result}, and the percent increase was {(100 * (ensemble_result/consens_result - 1))}")
 
         
@@ -75,8 +76,8 @@ def main(data_pardir, output_pardir):
     pvalues.update({site + ' vs cons': {} for site in sites})
 
     for metric in temp_df[BINARY_DICE].unique():
-        samples_1 = temp_df[(temp_df["Model Name"] == "G ensemble") & (temp_df[BINARY_DICE] == metric)][DICE].values
-        samples_2 = temp_df[(temp_df["Model Name"] == 'Full Federation Consensus') & (temp_df[BINARY_DICE] == metric)][DICE].values
+        samples_1 = temp_df[(temp_df["Model Name"] == "G ensemble") & (temp_df[BINARY_DICE] == metric)][DICE_OR_JACCARD].values
+        samples_2 = temp_df[(temp_df["Model Name"] == 'Full Federation Consensus') & (temp_df[BINARY_DICE] == metric)][DICE_OR_JACCARD].values
         stat, pvalue = scipy.stats.wilcoxon(samples_1, samples_2)
         m1, m2 = np.mean(samples_1), np.mean(samples_2)
         sd1, sd2 = np.std(samples_1), np.std(samples_2)
@@ -139,7 +140,7 @@ def main(data_pardir, output_pardir):
     ax.set_ylim(top=1.0, bottom=0.0)
     ax.set_title('Centralized Out-Of-Sample Data')
 
-    fpath = os.path.join(output_pardir, 'single_and_consensus_models_against_holdout_violin.pdf')
+    fpath = os.path.join(output_pardir, 'single_and_consensus_models_against_holdout_violin_' + DICE_OR_JACCARD + '.pdf')
 
     print(f"Saving output file at: {fpath}")
 
@@ -153,5 +154,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
     parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../../output")
+    parser.add_argument('--jaccard', '-j', action='store_true', help='Whether or not to convert DICE scores to Jaccard index.')
     args = parser.parse_args()
     main(**vars(args))
