@@ -114,7 +114,7 @@ def main(data_pardir, output_pardir, jaccard):
         
         
     ax = my_violin_plot(x_column=BINARY_DICE, 
-                    y_column=DICE, 
+                    y_column=DICE_OR_JACCARD, 
                     data=temp_df, 
                     hue='Model Name', 
                     order=['Average', 'ET', 'TC', 'WT'], 
