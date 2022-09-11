@@ -89,16 +89,29 @@ def main(data_pardir, output_pardir, jaccard):
     ax.legend(bbox_to_anchor= (.45, .15))
 
 
+    if jaccard:
 
-    vert_text_loc = {'Average': 0.613, 'ET': 0.582, 'TC': 0.578, 'WT': 0.7}
+        vert_text_loc = {'Average': 0.547, 'ET': 0.515, 'TC': 0.5, 'WT': 0.64}
 
-    hor_text_loc = {'Average': 0.105, 'ET': 0.345, 'TC': 0.59, 'WT': 0.825}
+        hor_text_loc = {'Average': 0.105, 'ET': 0.345, 'TC': 0.59, 'WT': 0.825}
 
-    hor_arrow_loc = {'Average': 0.0, 'ET': 1.0, 'TC': 2.0, 'WT': 3.0}
+        hor_arrow_loc = {'Average': 0.0, 'ET': 1.0, 'TC': 2.0, 'WT': 3.0}
 
-    arrow_length = {'Average': 0.157, 'ET': 0.162, 'TC': 0.198, 'WT': 0.116}
+        arrow_length = {'Average': 0.157, 'ET': 0.162, 'TC': 0.208, 'WT': 0.118}
 
-    vert_arrow_loc = {'Average': 0.671, 'ET': 0.638, 'TC': 0.62, 'WT': 0.753}
+        vert_arrow_loc = {'Average': 0.593, 'ET': 0.56, 'TC': 0.523, 'WT': 0.684}
+
+    else: 
+
+        vert_text_loc = {'Average': 0.613, 'ET': 0.582, 'TC': 0.578, 'WT': 0.7}
+
+        hor_text_loc = {'Average': 0.105, 'ET': 0.345, 'TC': 0.59, 'WT': 0.825}
+
+        hor_arrow_loc = {'Average': 0.0, 'ET': 1.0, 'TC': 2.0, 'WT': 3.0}
+
+        arrow_length = {'Average': 0.157, 'ET': 0.162, 'TC': 0.198, 'WT': 0.116}
+
+        vert_arrow_loc = {'Average': 0.671, 'ET': 0.638, 'TC': 0.62, 'WT': 0.753}
 
 
     # place text boxes
