@@ -18,12 +18,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy
 
-from fets_paper_figures import BINARY_DICE, DICE, my_violin_plot, prep_plots, other_font_size
-from fets_paper_figures import save_at_dpi
+from fets_paper_figures import my_violin_plot, prep_plots, other_font_size
+from fets_paper_figures import save_at_dpi, dice_or_jaccard
 
-def main(data_pardir, output_pardir):
+def main(data_pardir, output_pardir, jaccard ):
 
-    
+    BINARY_DICE='Tumor Sub-Compartment'
+
+    new_metric_names, metrics, region_label_dict, IN_DF_DICE_OR_JACCARD, DICE_OR_JACCARD = dice_or_jaccard(jaccard)    
 
     final_consensus_val_df = pd.read_csv(os.path.join(data_pardir, 'final_consensus_val_df.csv'))
     init_val_df = pd.read_csv(os.path.join(data_pardir, 'init_val_df.csv'))
@@ -33,17 +35,17 @@ def main(data_pardir, output_pardir):
 
 
     for binary_dice in ['Average', 'ET', 'TC', 'WT']:
-        init_score = init_val_df.groupby([BINARY_DICE]).mean().loc[binary_dice][DICE]
-        con_score = final_consensus_val_df.groupby([BINARY_DICE]).mean().loc[binary_dice][DICE]
+        init_score = init_val_df.groupby([BINARY_DICE]).mean().loc[binary_dice][IN_DF_DICE_OR_JACCARD]
+        con_score = final_consensus_val_df.groupby([BINARY_DICE]).mean().loc[binary_dice][IN_DF_DICE_OR_JACCARD]
         percent_increases[binary_dice] = 100 * (con_score/init_score - 1)
         
     prep_plots()    
 
     temp_df = final_consensus_val_df.sort_values(by=BINARY_DICE)
 
-    temp_df = temp_df.replace(to_replace='binary_DICE_ET', value='ET')
-    temp_df = temp_df.replace(to_replace='binary_DICE_TC', value='TC')
-    temp_df = temp_df.replace(to_replace='binary_DICE_WT', value='WT')
+    temp_df = temp_df.replace(to_replace='binary_' + IN_DF_DICE_OR_JACCARD + '_ET', value='ET')
+    temp_df = temp_df.replace(to_replace='binary_' + IN_DF_DICE_OR_JACCARD + '_TC', value='TC')
+    temp_df = temp_df.replace(to_replace='binary_' + IN_DF_DICE_OR_JACCARD + '_WT', value='WT')
 
     temp_df = temp_df.append(init_val_df)
 
@@ -61,8 +63,8 @@ def main(data_pardir, output_pardir):
     # getting p values for comparisons
     pvalues = {}
     for metric in temp_df[BINARY_DICE].unique():
-        samples_1 = temp_df[(temp_df["Model Type"] == "Public Initial Model") & (temp_df[BINARY_DICE] == metric)][DICE].values
-        samples_2 = temp_df[(temp_df["Model Type"] == 'Full Federation Consensus') & (temp_df[BINARY_DICE] == metric)][DICE].values
+        samples_1 = temp_df[(temp_df["Model Type"] == "Public Initial Model") & (temp_df[BINARY_DICE] == metric)][IN_DF_DICE_OR_JACCARD].values
+        samples_2 = temp_df[(temp_df["Model Type"] == 'Full Federation Consensus') & (temp_df[BINARY_DICE] == metric)][IN_DF_DICE_OR_JACCARD].values
         if len(samples_1) != len(samples_2):
             print("lengths of samples_1 and samples_2 are: ", len(samples_1), len(samples_2))
         stat, pvalue = scipy.stats.wilcoxon(samples_1, samples_2)
@@ -70,10 +72,10 @@ def main(data_pardir, output_pardir):
         sd1, sd2 = np.std(samples_1), np.std(samples_2)
         pvalues[metric] = pvalue 
 
-
+    temp_df = temp_df.rename({IN_DF_DICE_OR_JACCARD: DICE_OR_JACCARD}, axis=1)
         
     ax = my_violin_plot(x_column=BINARY_DICE, 
-                    y_column=DICE, 
+                    y_column=DICE_OR_JACCARD, 
                     data=temp_df, 
                     hue='Model Type', 
                     hatch='/', 
@@ -97,24 +99,48 @@ def main(data_pardir, output_pardir):
 
     meanline_length = 0.35
 
-    vert_text_loc = {'Average': 0.58, 'ET': 0.54, 'TC': 0.53, 'WT': 0.675}
+    if jaccard:
 
-    hor_text_loc = {'Average': 0.095, 'ET': 0.34, 'TC': 0.58, 'WT': 0.82}
+        vert_text_loc = {'Average': 0.53, 'ET': 0.51, 'TC': 0.46, 'WT': 0.632}
 
-    hor_arrow_loc = {'Average': 0.0, 'ET': 1.0, 'TC': 2.0, 'WT': 3.0}
+        hor_text_loc = {'Average': 0.107, 'ET': 0.34, 'TC': 0.585, 'WT': 0.83}
 
-    arrow_length = {'Average': 0.118, 'ET': 0.083, 'TC': 0.144, 'WT': 0.11}
+        hor_arrow_loc = {'Average': 0.0, 'ET': 1.0, 'TC': 2.0, 'WT': 3.0}
 
-    vert_arrow_loc = {'Average': 0.625, 'ET': 0.598, 'TC': 0.568, 'WT': 0.726}
+        arrow_length = {'Average': 0.13, 'ET': 0.103, 'TC': 0.15, 'WT': 0.11}
 
-    vert_meanline_loc = {'Average': {0: 0.631, 1: 0.7}, 
-                        'ET': {0: 0.598, 1: 0.7}, 
-                        'TC': {0: 0.568, 1: 0.7}, 
-                        'WT': {0: 0.726, 1: 0.8}}
-    hor_meanline_loc = {'Average': {0: (-0.73 + meanline_length), 1: (-0.3 + meanline_length)}, 
-                        'ET': {0: 0.8, 1: 1.2}, 
-                        'TC': {0: 1.8, 1: 2.2}, 
-                        'WT': {0: 2.8, 1: 3.2}}
+        vert_arrow_loc = {'Average': 0.555, 'ET': 0.53, 'TC': 0.48, 'WT': 0.65}
+
+        vert_meanline_loc = {'Average': {0: 0.631, 1: 0.7}, 
+                            'ET': {0: 0.598, 1: 0.7}, 
+                            'TC': {0: 0.568, 1: 0.7}, 
+                            'WT': {0: 0.726, 1: 0.8}}
+        hor_meanline_loc = {'Average': {0: (-0.73 + meanline_length), 1: (-0.3 + meanline_length)}, 
+                            'ET': {0: 0.8, 1: 1.2}, 
+                            'TC': {0: 1.8, 1: 2.2}, 
+                            'WT': {0: 2.8, 1: 3.2}}
+
+    else:
+
+        vert_text_loc = {'Average': 0.58, 'ET': 0.54, 'TC': 0.53, 'WT': 0.675}
+
+        hor_text_loc = {'Average': 0.095, 'ET': 0.34, 'TC': 0.58, 'WT': 0.82}
+
+        hor_arrow_loc = {'Average': 0.0, 'ET': 1.0, 'TC': 2.0, 'WT': 3.0}
+
+        arrow_length = {'Average': 0.118, 'ET': 0.083, 'TC': 0.144, 'WT': 0.11}
+
+        vert_arrow_loc = {'Average': 0.625, 'ET': 0.598, 'TC': 0.568, 'WT': 0.726}
+
+        vert_meanline_loc = {'Average': {0: 0.631, 1: 0.7}, 
+                            'ET': {0: 0.598, 1: 0.7}, 
+                            'TC': {0: 0.568, 1: 0.7}, 
+                            'WT': {0: 0.726, 1: 0.8}}
+        hor_meanline_loc = {'Average': {0: (-0.73 + meanline_length), 1: (-0.3 + meanline_length)}, 
+                            'ET': {0: 0.8, 1: 1.2}, 
+                            'TC': {0: 1.8, 1: 2.2}, 
+                            'WT': {0: 2.8, 1: 3.2}}
+
 
 
     for binary_dice in ['Average', 'ET', 'TC', 'WT']:
@@ -143,7 +169,7 @@ def main(data_pardir, output_pardir):
     cut = int(len(handles)/2)
     ax.legend(handles=handles[:cut] + cut*[None], labels=labels[:cut]+cut*[None], loc='lower left')
 
-    fpath = os.path.join(output_pardir, 'init_scores_versus_consensus_against_holdout_violin.pdf')
+    fpath = os.path.join(output_pardir, 'init_scores_versus_consensus_against_holdout_violin' + DICE_OR_JACCARD + '.pdf')
 
     print(f"\nThe p-values for each tumor region of the difference in the means between the public initial model and the final consensus are: {pvalues}\n\n")
     print("Saving output file at: ", fpath)
@@ -157,6 +183,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
     parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../../output")
+    parser.add_argument('--jaccard', '-j', action='store_true', help='Whether or not to convert DICE scores to Jaccard index.')
     args = parser.parse_args()
     main(**vars(args))
 
