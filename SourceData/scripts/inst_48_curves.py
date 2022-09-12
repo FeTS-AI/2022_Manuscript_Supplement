@@ -30,6 +30,8 @@ def main(data_pardir, output_pardir, jaccard):
 
 
     temp_df = df[df['CollaboratorName']=='institution_11']
+    
+    temp_df = temp_df.drop(['binary_DICE_ET', 'binary_DICE_TC', 'binary_DICE_WT'], axis=1)
 
     temp_df = temp_df.rename(region_label_dict, axis=1)
 
@@ -46,7 +48,8 @@ def main(data_pardir, output_pardir, jaccard):
                                                     metric_name_column_name='Tumor Sub-Compartment', 
                                                     metric_value_column_name=DICE_OR_JACCARD, 
                                                     custom_title='Local Validation For Site 48', 
-                                                    model_version_column_name='FL Training Round')
+                                                    model_version_column_name='FL Training Round', 
+                                                    metric_names=metrics)
 
 
 if __name__ == '__main__':

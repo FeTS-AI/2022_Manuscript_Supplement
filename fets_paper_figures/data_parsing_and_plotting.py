@@ -199,15 +199,14 @@ def aggregated_fine_grained_binary_dice_over_rounds(df,
                                                     custom_title=None,
                                                     metric_name_column_name=None, 
                                                     metric_value_column_name=None, 
-                                                    model_version_column_name=None): 
+                                                    model_version_column_name=None, 
+                                                    metric_names=['binary_DICE_ET', 'binary_DICE_TC', 'binary_DICE_WT']): 
     """
     Three plots (possibly with envelopes) (one for each region et, tc, wt) for a given task of binary dice 
     scores over rounds.
     """
     
-    if metric_name_column_name is None:
-        metric_names = ['binary_DICE_ET', 'binary_DICE_TC', 'binary_DICE_WT']
-    else:
+    if metric_name_column_name is not None:
         metric_names = ['ET', 'TC', 'WT']
         
     if model_version_column_name is None:
