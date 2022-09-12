@@ -16,26 +16,27 @@ import argparse
 import os
 import pandas as pd
 
-from fets_paper_figures import prep_plots, aggregated_fine_grained_binary_dice_over_rounds
+from fets_paper_figures import prep_plots, aggregated_fine_grained_binary_dice_over_rounds, dice_or_jaccard
     
 
-def main(data_pardir, output_pardir):
-    # This function produces a validation curve for institution 48 
+def main(data_pardir, output_pardir, jaccard):
+    # This function produces a validation curve for institution 48
 
-    df = pd.read_csv(os.path.join(data_pardir, 'val_df_final__.csv'))    
+    new_metric_names, metrics, region_label_dict, IN_DF_DICE_OR_JACCARD, DICE_OR_JACCARD = dice_or_jaccard(jaccard)
+ 
+
+    df = pd.read_csv(os.path.join(data_pardir, 'val_df_final.csv'))    
     prep_plots()
 
 
     temp_df = df[df['CollaboratorName']=='institution_11']
 
-    temp_df = temp_df.rename({'binary_DICE_ET': 'ET', 
-                            'binary_DICE_TC': 'TC', 
-                            'binary_DICE_WT': 'WT'}, axis=1)
+    temp_df = temp_df.rename(region_label_dict, axis=1)
 
     temp_df = temp_df.rename({"Binary DICE": "Tumor Sub-Compartment", 
-                            "DICE": "DSC"}, axis=1)
+                            IN_DF_DICE_OR_JACCARD: DICE_OR_JACCARD}, axis=1)
 
-    fpath = os.path.join(output_pardir, 'inst_48_curves.pdf')
+    fpath = os.path.join(output_pardir, 'inst_48_curves_' + DICE_OR_JACCARD + '.pdf')
 
     aggregated_fine_grained_binary_dice_over_rounds(df=temp_df, 
                                                     task='shared_model_validation', 
@@ -43,7 +44,7 @@ def main(data_pardir, output_pardir):
                                                     fpath=fpath, 
                                                     no_title=False, 
                                                     metric_name_column_name='Tumor Sub-Compartment', 
-                                                    metric_value_column_name='DSC', 
+                                                    metric_value_column_name=DICE_OR_JACCARD, 
                                                     custom_title='Local Validation For Site 48', 
                                                     model_version_column_name='FL Training Round')
 
@@ -52,5 +53,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_pardir', '-dp', type=str, help='Absolute path to the data parent directory.', default="../")
     parser.add_argument('--output_pardir', '-op', type=str, help='Absolute path to the output parent directory.', default="../../output")
+    parser.add_argument('--jaccard', '-j', action='store_true', help='Whether or not to convert DICE scores to Jaccard index.')  
     args = parser.parse_args()
     main(**vars(args))
