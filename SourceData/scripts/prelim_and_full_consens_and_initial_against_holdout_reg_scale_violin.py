@@ -37,11 +37,6 @@ def main(data_pardir, output_pardir, jaccard):
     single_models_val_df = pd.read_csv(os.path.join(data_pardir, 'single_models_val_df.csv'))
     consensus_model_results_inhouse_only_df = pd.read_csv(os.path.join(data_pardir, 'consensus_model_results_inhouse_only_df.csv'))
 
-    # TODO: remove debug DEBUG below
-    print(prelim_consensus_df.columns)
-    print(single_models_val_df.columns)
-    print(consensus_model_results_inhouse_only_df.columns)
-
     prep_plots()
 
     first_sup_df = init_val_inhouse_only_df.replace(to_replace='initial', value='Public Initial Model')
