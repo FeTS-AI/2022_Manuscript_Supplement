@@ -10,7 +10,7 @@ Provided here are csv files for data as well as scripts for processing and visua
 
 ## Steps for setup:
 1. Create a python virtual environment(tested with Python 3.8) and install by running, 'pip install --upgrade pip' followed by, 'pip install .' from the top directory
-2. Navigate to the SourceData directory and run 'tar -xvf SourceData.tar' to extract the zip archive
+2. Navigate to the SourceData directory and run 'tar -xvf SourceData.tar' to extract the tar archive
 3. Navigate to the scripts subdirectoy and run scripts using this virtual environment
 
 The scripts save images to disc and/or print latex code (for tables) to stdout
