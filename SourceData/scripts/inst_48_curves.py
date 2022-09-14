@@ -31,8 +31,6 @@ def main(data_pardir, output_pardir, jaccard):
 
     temp_df = df[df['CollaboratorName']=='institution_11']
     
-    temp_df = temp_df.drop(['binary_DICE_ET', 'binary_DICE_TC', 'binary_DICE_WT'], axis=1)
-
     temp_df = temp_df.rename(region_label_dict, axis=1)
 
     temp_df = temp_df.rename({"Binary DICE": "Tumor Sub-Compartment", 
